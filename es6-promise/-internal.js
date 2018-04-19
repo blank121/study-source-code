@@ -37,6 +37,7 @@ function getThen (promise) {
     return TRY_CATCH_ERROR;
   }
 }
+
 /*
  * value:thenable
  * */
@@ -47,19 +48,23 @@ function tryThen (then, value, fulfillmentHandler, rejectionHandler) {
     return e;
   }
 }
+
 /*
  * thenable 是函数，有then方法
  * */
+
+//handleForeignThenable(promise, maybeThenable, then);
 function handleForeignThenable (promise, thenable, then) {
   asap(promise => {//asap这里默认分析 setTimeout(fn,0) 下一轮任务开始时执行
-    var sealed = false;
-    var error = tryThen(then, thenable, value => {//fullfill   value:thenable传入的参数  尝试执行
+    var sealed = false;//是否有结果
+    //value:thenable传入的参数 ，尝试执行
+    var error = tryThen(then, thenable, value => {//fullfill时，
       if (sealed) {
         return;
       }
-      sealed = true;//闭包实现 thenable obj多次执行then 结果相同？ TODO
+      sealed = true;
       if (thenable !== value) {//如果不是直接resolve原对象
-        resolve(promise, value);//继续对resolve的val进行resolve
+        resolve(promise, value);//继续对resolve的val进行resolve处理
       } else {
         fulfill(promise, value);
       }
@@ -72,7 +77,7 @@ function handleForeignThenable (promise, thenable, then) {
       reject(promise, reason);
     }, 'Settle: ' + (promise._label || ' unknown promise'));
 
-    if (!sealed && error) {//抛错 未正常执行resolve reject
+    if (!sealed && error) {//tryThen抛错
       sealed = true;
       reject(promise, error);
     }
@@ -89,21 +94,18 @@ function handleOwnThenable (promise, thenable) {
       reason => reject(promise, reason))
   }
 }
-/*
- maybeThenable:value
- then:value.then
- */
+
+/*maybeThenable:value;then:value.then*/
 function handleMaybeThenable (promise, maybeThenable, then) {//thenable obj or promise
-  /* originalThen : 定义的原始then
-   originalResolve：原始resolve*/
+  /* originalThen : 定义的原始then;originalResolve：原始resolve*/
   if (maybeThenable.constructor === promise.constructor && //判断是否是promise且没经修改原生方法
     then === originalThen && maybeThenable.constructor.resolve === originalResolve) {
-    handleOwnThenable(promise, maybeThenable);
+    handleOwnThenable(promise, maybeThenable);//maybeThenable是一个原生的promise
   } else {//maybeThenable
     if (then === TRY_CATCH_ERROR) {// getThen 抛错
       reject(promise, TRY_CATCH_ERROR.error);
       TRY_CATCH_ERROR.error = null;//释放引用
-    } else if (then === undefined) {
+    } else if (then === undefined) {//若不是一个thenable，直接完成态
       fulfill(promise, maybeThenable);
     } else if (isFunction(then)) {//若是一个thenable
       handleForeignThenable(promise, maybeThenable, then);
@@ -156,6 +158,7 @@ function reject (promise, reason) {
 
   asap(publishRejection, promise);//as soon as possible
 }
+
 /*
  * parent:thenable
  * child : undefined or other
@@ -163,7 +166,7 @@ function reject (promise, reason) {
 //subscribe(parent, child, onFulfillment, onRejection);
 //如果promise仍是pending,则将回调函数加入_subscribers等待通知
 function subscribe (parent, child, onFulfillment, onRejection) {
-  let {_subscribers} = parent;//取thenable通过then注册的订阅
+  let {_subscribers} = parent;//取注册的所有订阅
   let {length} = _subscribers;
 
   parent._onerror = null;
@@ -173,12 +176,12 @@ function subscribe (parent, child, onFulfillment, onRejection) {
   _subscribers[length + REJECTED] = onRejection;
 
   /*
-  * 1、如果之前有订阅且状态是pending， 订阅就好了，等待resolve完成时的发布通知就好
-  * 2、如果之前有订阅且状态不是pending，继续加入订阅就好，length=0时已经准备调度发布了
-  * 3、如果之前无订阅且状态是pending，订阅就好了，等待resolve完成时的发布通知就好
+  * 1、如果之前有订阅且状态是pending， 订阅就好了，等待resolve完成时的发布通知执行就好
+  * 2、如果之前有订阅且状态不是pending，继续加入订阅就好，length=0时已经准备调度发布了，pulish执行时会清空。此时不为0说明未publish
+  * 3、如果之前无订阅且状态是pending，订阅就好了，等待resolve完成时的发布通知执行就好
   * 4、如下，赶紧调度执行获取结果
   * */
-  if (length === 0 && parent._state) {//如果之前没有订阅且thenable已不是pending， TODO
+  if (length === 0 && parent._state) {//如果之前没有订阅且thenable已不是pending，
     asap(publish, parent);
   }
 }
@@ -187,12 +190,14 @@ function publish (promise) {
   let subscribers = promise._subscribers;
   let settled = promise._state;
 
+  //没有订阅者
   if (subscribers.length === 0) {
     return;
   }
 
   let child, callback, detail = promise._result;
 
+  //这里i+=3 是因为then注册时 i是promise,i+1是resolve,i+2是reject
   for (let i = 0; i < subscribers.length; i += 3) {
     child = subscribers[i];
     callback = subscribers[i + settled];
@@ -203,7 +208,7 @@ function publish (promise) {
       callback(detail);
     }
   }
-
+  //通知完毕，清除订阅
   promise._subscribers.length = 0;
 }
 
@@ -216,6 +221,7 @@ function tryCatch (callback, detail) {
     return TRY_CATCH_ERROR;
   }
 }
+
 //asap(() => invokeCallback(_state, child, callback, parent._result));
 //执行回调：
 function invokeCallback (settled, promise, callback, detail) {
@@ -223,7 +229,7 @@ function invokeCallback (settled, promise, callback, detail) {
     value, error, succeeded, failed;
 
   if (hasCallback) {
-    value = tryCatch(callback, detail);//成功时value 是then（）注册的回调方法的返回值
+    value = tryCatch(callback, detail);//尝试执行使用者then（）传入的回调，成功时value 是then（）注册的回调方法的返回值
 
     if (value === TRY_CATCH_ERROR) {
       failed = true;
@@ -238,12 +244,12 @@ function invokeCallback (settled, promise, callback, detail) {
       return;
     }
 
-  } else {
+  } else {// then 未传入相关回调，继续传递
     value = detail;
     succeeded = true;
   }
 
-  if (promise._state !== PENDING) {//child已有确定的状态 无需执行
+  if (promise._state !== PENDING) {
     // noop
   } else if (hasCallback && succeeded) {
     resolve(promise, value);//value 可能为thenable
@@ -263,6 +269,7 @@ function invokeCallback (settled, promise, callback, detail) {
  * @return
  */
 // 初始化promise new时调用
+//initializePromise(this, resolver)
 function initializePromise (promise, resolver) {
   try {
     //执行resolver 传入回调
@@ -277,6 +284,7 @@ function initializePromise (promise, resolver) {
 }
 
 let id = 0;
+
 function nextId () {
   return id++;
 }

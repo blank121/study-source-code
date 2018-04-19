@@ -4,40 +4,41 @@ import {
 } from '../-internal';
 
 /**
-  `Promise.resolve` returns a promise that will become resolved with the
-  passed `value`. It is shorthand for the following:
+ `Promise.resolve` returns a promise that will become resolved with the
+ passed `value`. It is shorthand for the following:
 
-  ```javascript
-  let promise = new Promise(function(resolve, reject){
+ ```javascript
+ let promise = new Promise(function(resolve, reject){
     resolve(1);
   });
 
-  promise.then(function(value){
+ promise.then(function(value){
     // value === 1
   });
-  ```
+ ```
 
-  Instead of writing the above, your code now simply becomes the following:
+ Instead of writing the above, your code now simply becomes the following:
 
-  ```javascript
-  let promise = Promise.resolve(1);
+ ```javascript
+ let promise = Promise.resolve(1);
 
-  promise.then(function(value){
+ promise.then(function(value){
     // value === 1
   });
-  ```
+ ```
 
-  @method resolve
-  @static
-  @param {Any} value value that the returned promise will be resolved with
-  Useful for tooling.
-  @return {Promise} a promise that will become fulfilled with the given
-  `value`
-*/
-export default function resolve(object) {
+ @method resolve
+ @static
+ @param {Any} value value that the returned promise will be resolved with
+ Useful for tooling.
+ @return {Promise} a promise that will become fulfilled with the given
+ `value`
+ */
+//Promise.resolve
+export default function resolve (object) {
   /*jshint validthis:true */
   let Constructor = this;
-
+  //若resolve一个promise。直接返回。
   if (object && typeof object === 'object' && object.constructor === Constructor) {
     return object;
   }
