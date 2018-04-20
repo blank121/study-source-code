@@ -174,8 +174,8 @@ function subscribe (parent, child, onFulfillment, onRejection) {
 
   /*
   * 1、如果之前有订阅且状态是pending， 订阅就好了，等待resolve完成时的发布通知就好
-  * 2、如果之前有订阅且状态不是pending，继续加入订阅就好，length=0时已经准备调度发布了
-  * 3、如果之前无订阅且状态是pending，订阅就好了，等待resolve完成时的发布通知就好
+  * 2、如果之前无订阅且状态是pending，订阅就好了，等待resolve完成时的发布通知就好
+  * 3、如果之前有订阅且状态不是pending，继续加入订阅就好，length=0时已经准备调度发布了
   * 4、如下，赶紧调度执行获取结果
   * */
   if (length === 0 && parent._state) {//如果之前没有订阅且thenable已不是pending， TODO
