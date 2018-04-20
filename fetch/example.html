@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="./fetch.js"></script>
+</head>
+<body>
+<script>
+var result = fetch('https://api.github.com')
+result.then(function (response) {
+  console.log('response', response)
+  console.log('header', response.headers.get('Content-Type'))
+  return response.text()
+}).then(function (text) {
+  console.log('got text', text)
+}).catch(function (ex) {
+  console.log('failed', ex)
+})
+
+//var xhr = new XMLHttpRequest();
+//xhr.timeout = 13000;
+//xhr.ontimeout = function (event) {
+//  alert("请求超时！");
+//}
+//
+//xhr.open('GET', 'https://api.github.com');
+//console.log('111'+xhr.getAllResponseHeaders());
+//xhr.send();
+//xhr.onreadystatechange = function () {
+//  if (xhr.readyState == 4 && xhr.status == 200) {
+//    console.log(xhr.responseText);
+//    console.log('222'+xhr.getAllResponseHeaders());
+//    console.log('---------------------------------------');
+//  } else {
+//    console.log(xhr.statusText);
+//  }
+//}
+</script>
+</body>
+</html>

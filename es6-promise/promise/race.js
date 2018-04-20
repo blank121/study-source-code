@@ -74,7 +74,7 @@ export default function race (entries) {
   if (!isArray(entries)) {
     return new Constructor((_resolve, reject) => reject(new TypeError('You must pass an array to race.')));
   } else {
-    return new Constructor((resolve, reject) => {//new 执行一次
+    return new Constructor((xresolve, reject) => {//new 执行一次
       let length = entries.length;
       for (let i = 0; i < length; i++) {//执行每一个传入的entry 但只有最快的一个能resolve或reject改变返回的这个promise的状态
         Constructor.resolve(entries[i]).then(resolve, reject);
