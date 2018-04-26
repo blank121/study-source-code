@@ -32,6 +32,7 @@
         white-space: nowrap;
         height: 100%;
         position: relative;
+        overflow: hidden;
     }
 
     .img-wrapper {
@@ -39,7 +40,7 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        transition: left 0.5s;
+        transition: left .25s;
     }
 
     .img-wrapper img {
@@ -53,7 +54,6 @@
 
     .current {
         left: 0;
-        z-index: 999;
     }
 
     .right {
@@ -61,35 +61,90 @@
     }
 </style>
 <script>
-    var LEFT = 0, RIGHT = 1;
-    var boxes = ["img-wrapper1", "img-wrapper2", "img-wrapper3"];
-    function previous() {
-        var footer = boxes.pop();
-        boxes.unshift(footer);
-        move(boxes, LEFT);
-    }
-    function next() {
-        var head = boxes.shift();
-        boxes.push(head);
-        move(boxes, RIGHT);
-    }
-    function move(boxes, direction) {
-        var leftNode = document.getElementById(boxes[0]);
-        leftNode.style.visibility = direction == RIGHT ? 'visible' : 'hidden';
-        !leftNode.classList.contains('left') && leftNode.classList.add('left');
-        leftNode.classList.remove('current');
-        leftNode.classList.remove('right');
+var urls = []
+var LEFT = 0, RIGHT = 1;
+var boxes = [];
+var curIndex = 0;
 
-        var currentNode = document.getElementById(boxes[1]);
-        currentNode.style.visibility = 'visible';
-        !currentNode.classList.contains('current') && currentNode.classList.add('current');
-        currentNode.classList.remove('left');
-        currentNode.classList.remove('right');
-
-        var rightNode = document.getElementById(boxes[2]);
-        rightNode.style.visibility = direction == left ? 'visible' : 'hidden';
-        !rightNode.classList.contains('right') && rightNode.classList.add('right');
-        rightNode.classList.remove('left');
-        rightNode.classList.remove('current');
+/*
+* {
+*   urls:[]
+*   curIndex:0
+* }
+*
+*
+* */
+function init (options) {
+  curIndex = options.curIndex;
+  urls = options.urls;
+  var imgWrapper1 = document.getElementById('img-wrapper1');
+  boxes.push(
+    {
+      el: imgWrapper1,
+      imgEL: imgWrapper1.getElementsByTagName('img')[0]
     }
+  );
+  var imgWrapper2 = document.getElementById('img-wrapper2');
+  boxes.push(
+    {
+      el: imgWrapper2,
+      imgEL: imgWrapper2.getElementsByTagName('img')[0]
+    }
+  );
+  var imgWrapper3 = document.getElementById('img-wrapper3');
+  boxes.push(
+    {
+      el: imgWrapper3,
+      imgEL: imgWrapper3.getElementsByTagName('img')[0]
+    }
+  );
+  buildImgUrl(boxes);
+}
+
+function buildImgUrl (boxes) {
+  boxes[0].imgEL.src = urls[curIndex === 0 ? urls.length - 1 : curIndex - 1];
+  boxes[1].imgEL.src = urls[curIndex];
+  boxes[2].imgEL.src = urls[curIndex === urls.length - 1 ? 0 : curIndex + 1];
+}
+
+function previous () {
+  curIndex = curIndex === 0 ? urls.length - 1 : curIndex - 1
+  var head = boxes.shift();
+  boxes.push(head);
+  buildImgUrl(boxes);
+  move(boxes, LEFT);
+}
+
+function next () {
+  curIndex = curIndex === urls.length - 1 ? 0 : curIndex + 1
+  var footer = boxes.pop();
+  boxes.unshift(footer);
+  buildImgUrl(boxes);
+  move(boxes, RIGHT);
+}
+
+function move (boxes, direction) {
+  var leftNode = boxes[0].el;
+  leftNode.style.visibility = direction === LEFT ? 'visible' : 'hidden';
+  !leftNode.classList.contains('left') && leftNode.classList.add('left');
+  leftNode.classList.remove('current');
+  leftNode.classList.remove('right');
+
+  var currentNode = boxes[1].el;
+  currentNode.style.visibility = 'visible';
+  !currentNode.classList.contains('current') && currentNode.classList.add('current');
+  currentNode.classList.remove('left');
+  currentNode.classList.remove('right');
+
+  var rightNode = boxes[2].el;
+  rightNode.style.visibility = direction === RIGHT ? 'visible' : 'hidden';
+  !rightNode.classList.contains('right') && rightNode.classList.add('right');
+  rightNode.classList.remove('left');
+  rightNode.classList.remove('current');
+}
+
+init({
+  urls: ['./1.jpg', './2.jpg', './3.jpg', './4.jpg', './5.jpg'],
+  curIndex: 0
+})
 </script>
