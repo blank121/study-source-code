@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body style="margin: 0;height: 777px">
+<div class="carousel">
+    <div class="main">
+        <div class="img-wrapper left" id="img-wrapper1">
+            <img src="./1.jpg">
+        </div>
+        <div class="img-wrapper current" id="img-wrapper2">
+            <img src="./5.jpg">
+        </div>
+        <div class="img-wrapper right" id="img-wrapper3">
+            <img src="./3.jpg">
+        </div>
+    </div>
+</div>
+<button onclick="previous()">previous</button>
+<button onclick="next()">next</button>
+</body>
+</html>
+<style scoped>
+    .carousel {
+        height: 33%;
+    }
+
+    .main {
+        font-size: 0;
+        white-space: nowrap;
+        height: 100%;
+        position: relative;
+    }
+
+    .img-wrapper {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transition: left 0.5s;
+    }
+
+    .img-wrapper img {
+        height: 100%;
+        width: 100%;
+    }
+
+    .left {
+        left: -100%;
+    }
+
+    .current {
+        left: 0;
+        z-index: 999;
+    }
+
+    .right {
+        left: 100%;
+    }
+</style>
+<script>
+    var LEFT = 0, RIGHT = 1;
+    var boxes = ["img-wrapper1", "img-wrapper2", "img-wrapper3"];
+    function previous() {
+        var footer = boxes.pop();
+        boxes.unshift(footer);
+        move(boxes, LEFT);
+    }
+    function next() {
+        var head = boxes.shift();
+        boxes.push(head);
+        move(boxes, RIGHT);
+    }
+    function move(boxes, direction) {
+        var leftNode = document.getElementById(boxes[0]);
+        leftNode.style.visibility = direction == RIGHT ? 'visible' : 'hidden';
+        !leftNode.classList.contains('left') && leftNode.classList.add('left');
+        leftNode.classList.remove('current');
+        leftNode.classList.remove('right');
+
+        var currentNode = document.getElementById(boxes[1]);
+        currentNode.style.visibility = 'visible';
+        !currentNode.classList.contains('current') && currentNode.classList.add('current');
+        currentNode.classList.remove('left');
+        currentNode.classList.remove('right');
+
+        var rightNode = document.getElementById(boxes[2]);
+        rightNode.style.visibility = direction == left ? 'visible' : 'hidden';
+        !rightNode.classList.contains('right') && rightNode.classList.add('right');
+        rightNode.classList.remove('left');
+        rightNode.classList.remove('current');
+    }
+</script>
