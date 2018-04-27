@@ -4,22 +4,31 @@
     <meta charset="UTF-8">
     <title></title>
 </head>
-<body style="margin: 0;height: 777px">
+<body style="margin: 0;height: 999px">
 <div class="carousel">
-    <div class="main">
+    <main class="main">
+        <div class="previous">
+            <div class="previous-button"></div>
+        </div>
         <div class="img-wrapper left" id="img-wrapper1">
-            <img src="./1.jpg">
+            <img>
         </div>
         <div class="img-wrapper current" id="img-wrapper2">
-            <img src="./5.jpg">
+            <img>
         </div>
         <div class="img-wrapper right" id="img-wrapper3">
-            <img src="./3.jpg">
+            <img>
         </div>
-    </div>
+        <div class="next">
+            <div class="next-button"></div>
+        </div>
+
+        <div class="guide">
+        </div>
+    </main>
 </div>
-<button onclick="previous()">previous</button>
-<button onclick="next()">next</button>
+<button onclick="onPrevious()">previous</button>
+<button onclick="onNext()">next</button>
 </body>
 </html>
 <style scoped>
@@ -40,12 +49,74 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        transition: left .25s;
+        transition: left 1s;
     }
 
     .img-wrapper img {
         height: 100%;
         width: 100%;
+    }
+
+    main:hover .previous {
+        visibility: visible;
+    }
+
+    main:hover .next {
+        visibility: visible;
+    }
+
+    .previous {
+        z-index: 3;
+        cursor: pointer;
+        left: 1%;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        border: 1px solid grey;
+        visibility: hidden;
+    }
+
+    .next {
+        z-index: 3;
+        cursor: pointer;
+        right: 1%;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        border: 1px solid grey;
+        visibility: hidden;
+    }
+
+    .previous-button {
+        position: absolute;
+        height: 0;
+        top: 0;
+        left: 7px;
+        bottom: 0;
+        margin: auto 0;
+        border-top: 8px solid transparent;
+        border-right: 15px solid #c5c5c5;
+        border-bottom: 8px solid transparent;
+    }
+
+    .next-button {
+        position: absolute;
+        height: 0;
+        top: 0;
+        left: 11px;
+        bottom: 0;
+        margin: auto 0;
+        border-top: 8px solid transparent;
+        border-left: 15px solid #c5c5c5;
+        border-bottom: 8px solid transparent;
     }
 
     .left {
@@ -59,24 +130,65 @@
     .right {
         left: 100%;
     }
+
+    .guide {
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%); /*自身宽度的50%*/
+    }
+
+    .indicator {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #eeeeee;
+        border: 1px solid white;
+        cursor: pointer;
+        display: inline-block;
+        margin: 0 11px;
+    }
+
+    .indicator:hover {
+        border-color: #328bff;
+    }
 </style>
 <script>
 var urls = []
 var LEFT = 0, RIGHT = 1;
 var boxes = [];
 var curIndex = 0;
-
+var isAutoPlay = true;
+var cycle = 2222//ms
+var isMoving = false;//全局状态控制
+var timerId = null;
 /*
-* {
-*   urls:[]
-*   curIndex:0
-* }
-*
-*
-* */
+ * {
+ *   el:
+ *   urls:[]
+ *   curIndex:0
+ *   isAutoPlay:true
+ *   cycle:999
+ * }
+ *
+ *
+ * */
 function init (options) {
+  if(!options.el){
+    throw new Error('el does not exist');
+  }
+  initData(options);
+  boxes[1].imgEL.src = urls[curIndex];
+  buildImgUrl(boxes);
+  buildButtons();
+  buildGuideCircles(urls.length);
+  isAutoPlay && (timerId = setTimeout(autoPlay, cycle));
+}
+function initData (options) {
   curIndex = options.curIndex;
   urls = options.urls;
+  isAutoPlay = typeof options.isAutoPlay === 'boolean' ? options.isAutoPlay : true;
+  cycle = typeof options.cycle === 'number' ? options.cycle : 2222;
   var imgWrapper1 = document.getElementById('img-wrapper1');
   boxes.push(
     {
@@ -98,34 +210,131 @@ function init (options) {
       imgEL: imgWrapper3.getElementsByTagName('img')[0]
     }
   );
-  buildImgUrl(boxes);
+}
+function buildButtons (options) {
+
+}
+function buildGuideCircles (length) {
+  var guide = document.querySelector('.guide');
+  guide.addEventListener('click', guideClickHandler);//委托
+  buildIndicators(guide, length);
+  initIndicators(guide);
+  function buildIndicators (guide, length) {
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < length; i++) {
+      var div = document.createElement('div');
+      div.classList.add('indicator');
+      div.dataset.index = i;
+      frag.appendChild(div);
+    }
+    guide.appendChild(frag);
+  }
+
+  //TODO
+  function guideClickHandler (e) {
+    //isNullOrUndefined
+    if (isMoving) {
+      return;
+    }
+    if (typeof e.target.dataset.index === 'undefined' || (typeof e.target.dataset.index === 'object' && !e.target.dataset.index)) {
+      return;
+    }
+    clearTimeout(timerId);
+    jumpTo(Number(e.target.dataset.index));
+    timerId = setTimeout(autoPlay, cycle)
+  }
+}
+function buildGuideCircles (length) {
+  var guide = document.querySelector('.guide');
+  guide.addEventListener('click', guideClickHandler);//委托
+  buildIndicators(guide, length);
+  initIndicators(guide);
+  function buildIndicators (guide, length) {
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < length; i++) {
+      var div = document.createElement('div');
+      div.classList.add('indicator');
+      div.dataset.index = i;
+      frag.appendChild(div);
+    }
+    guide.appendChild(frag);
+  }
+
+  //TODO
+  function guideClickHandler (e) {
+    //isNullOrUndefined
+    if (isMoving) {
+      return;
+    }
+    if (typeof e.target.dataset.index === 'undefined' || (typeof e.target.dataset.index === 'object' && !e.target.dataset.index)) {
+      return;
+    }
+    clearTimeout(timerId);
+    jumpTo(Number(e.target.dataset.index));
+    timerId = setTimeout(autoPlay, cycle)
+  }
 }
 
 function buildImgUrl (boxes) {
   boxes[0].imgEL.src = urls[curIndex === 0 ? urls.length - 1 : curIndex - 1];
-  boxes[1].imgEL.src = urls[curIndex];
   boxes[2].imgEL.src = urls[curIndex === urls.length - 1 ? 0 : curIndex + 1];
+  isMoving = false;
 }
+function onNext () {
+  clearTimeout(timerId);
+  next();
+  timerId = setTimeout(autoPlay, cycle)
+}
+function onPrevious () {
+  clearTimeout(timerId);
+  previous();
+  timerId = setTimeout(autoPlay, cycle)
+}
+function previous (step) {//step移动步数
+  if (isMoving) {
+    return;
+  }
+  !step && step !== 0 && (step = 1);//step不存在，默认移动1一步
+  curIndex = curIndex - step;
+  if (curIndex < 0) {
+    curIndex += urls.length
+  }
+  var footer = boxes.pop();
+  boxes.unshift(footer);
 
-function previous () {
-  curIndex = curIndex === 0 ? urls.length - 1 : curIndex - 1
-  var head = boxes.shift();
-  boxes.push(head);
-  buildImgUrl(boxes);
   move(boxes, LEFT);
 }
 
-function next () {
-  curIndex = curIndex === urls.length - 1 ? 0 : curIndex + 1
-  var footer = boxes.pop();
-  boxes.unshift(footer);
-  buildImgUrl(boxes);
+function next (step) {
+  if (isMoving) {
+    return;
+  }
+  !step && step !== 0 && (step = 1);//i不存在，默认移动1一步
+  curIndex = curIndex + step;
+  if (curIndex >= urls.length) {
+    curIndex -= urls.length
+  }
+  var head = boxes.shift();
+  boxes.push(head);
   move(boxes, RIGHT);
 }
 
+//跳到第几张
+function jumpTo (i) {
+  if (i > curIndex) {
+    next(i - curIndex);
+  } else if (i < curIndex) {
+    previous(curIndex - i);
+  }
+}
+
+
 function move (boxes, direction) {
+  isMoving = true;
+  boxes[1].imgEL.src = urls[curIndex];//先渲染主图
+
   var leftNode = boxes[0].el;
-  leftNode.style.visibility = direction === LEFT ? 'visible' : 'hidden';
+  leftNode.style.visibility = direction === RIGHT ? 'visible' : 'hidden';
   !leftNode.classList.contains('left') && leftNode.classList.add('left');
   leftNode.classList.remove('current');
   leftNode.classList.remove('right');
@@ -137,14 +346,34 @@ function move (boxes, direction) {
   currentNode.classList.remove('right');
 
   var rightNode = boxes[2].el;
-  rightNode.style.visibility = direction === RIGHT ? 'visible' : 'hidden';
+  rightNode.style.visibility = direction === LEFT ? 'visible' : 'hidden';
   !rightNode.classList.contains('right') && rightNode.classList.add('right');
   rightNode.classList.remove('left');
   rightNode.classList.remove('current');
+  var guide = document.querySelector('.guide');
+
+  initIndicators(guide);
+  setTimeout(buildImgUrl, 1000, boxes);
+
+}
+function initIndicators (guide) {
+  guide.querySelectorAll('[data-index]').forEach(function (item) {
+    item.style.borderColor = 'white';
+  })
+  guide.querySelector('[data-index="' + curIndex + '"]').style.borderColor = '#328bff';
+}
+function autoPlay () {
+  if (isMoving) {
+    return;
+  }
+  next();
+  isAutoPlay && (timerId = setTimeout(autoPlay, cycle));
 }
 
+
+//-----------------------------------------------------------------------------------------
 init({
-  urls: ['./1.jpg', './2.jpg', './3.jpg', './4.jpg', './5.jpg'],
-  curIndex: 0
+  urls: ['./1.jpg', './2.jpg', './3.jpg', './4.jpg', './5.jpg'],//
+  curIndex: 3//urls数组的下标，0是第一个
 })
 </script>
