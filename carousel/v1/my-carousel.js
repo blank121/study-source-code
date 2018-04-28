@@ -1,166 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body style="margin: 0;position: absolute;width: 100%;height: 100%;" id="body">
-<div style="height: 33%" id="div1"></div>
-<div style="height: 33%" id="div2"></div>
-<div style="height: 33%" id="div3"></div>
-<!--<div class="carousel">-->
-<!--<main class="main">-->
-<!--<div class="previous">-->
-<!--<div class="previous-button"></div>-->
-<!--</div>-->
-<!--<div class="img-wrapper left" id="img-wrapper1">-->
-<!--<img>-->
-<!--</div>-->
-<!--<div class="img-wrapper current" id="img-wrapper2">-->
-<!--<img>-->
-<!--</div>-->
-<!--<div class="img-wrapper right" id="img-wrapper3">-->
-<!--<img>-->
-<!--</div>-->
-<!--<div class="next">-->
-<!--<div class="next-button"></div>-->
-<!--</div>-->
-<!--<div class="guide">-->
-<!--</div>-->
-<!--</main>-->
-<!--</div>-->
-</body>
-</html>
-<style scoped>
-    .carousel {
-        height: 100%;
-    }
-
-    .main {
-        font-size: 0;
-        white-space: nowrap;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .img-wrapper {
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        transition: left .5s;
-    }
-
-    .img-wrapper img {
-        height: 100%;
-        width: 100%;
-    }
-
-    main:hover .previous {
-        visibility: visible;
-    }
-
-    main:hover .next {
-        visibility: visible;
-    }
-
-    .previous {
-        z-index: 3;
-        cursor: pointer;
-        left: 1%;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        position: absolute;
-        width: 33px;
-        height: 33px;
-        border-radius: 50%;
-        border: 1px solid grey;
-        visibility: hidden;
-    }
-
-    .next {
-        z-index: 3;
-        cursor: pointer;
-        right: 1%;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        position: absolute;
-        width: 33px;
-        height: 33px;
-        border-radius: 50%;
-        border: 1px solid grey;
-        visibility: hidden;
-    }
-
-    .previous-button {
-        position: absolute;
-        height: 0;
-        top: 0;
-        left: 7px;
-        bottom: 0;
-        margin: auto 0;
-        border-top: 8px solid transparent;
-        border-right: 15px solid #c5c5c5;
-        border-bottom: 8px solid transparent;
-    }
-
-    .next-button {
-        position: absolute;
-        height: 0;
-        top: 0;
-        left: 11px;
-        bottom: 0;
-        margin: auto 0;
-        border-top: 8px solid transparent;
-        border-left: 15px solid #c5c5c5;
-        border-bottom: 8px solid transparent;
-    }
-
-    .left {
-        left: -100%;
-    }
-
-    .current {
-        left: 0;
-    }
-
-    .right {
-        left: 100%;
-    }
-
-    .guide {
-        position: absolute;
-        bottom: 5%;
-        left: 50%;
-        transform: translateX(-50%); /*自身宽度的50%*/
-    }
-
-    .indicator {
-        width: 11px;
-        height: 11px;
-        border-radius: 50%;
-        background: #eeeeee;
-        border: 1px solid white;
-        cursor: pointer;
-        display: inline-block;
-        margin: 0 11px;
-    }
-
-    .indicator:hover {
-        border-color: #328bff;
-    }
-</style>
-<script>
-var carousel = (function () {
-  function noop () {
-  }
+window.myCarousel = (function () {
+  /*
+   * {
+   *   el://required
+   *   urls:[]//required
+   *   curIndex:0 //初始显示第几张 0开始
+   *   isAutoPlay:true//是否自动播放
+   *   cycle:999//切换时间间隔（误差几毫秒）
+   *   change:function(newIndex,oldIndex);（即将切换之前的回调）return false表示阻止本次切换
+   * }
+   * 开放的接口
+   * previous()上一张
+   * next()下一张
+   * jumpTo(i)跳到第几张（i不要超过urls.length哦）
+   * */
+  var LEFT = 0, RIGHT = 1;
 
   function initCarousel (options) {
     var urls = []
-    var LEFT = 0, RIGHT = 1;
     var boxes = [];
     var curIndex = 0;
     var isAutoPlay = true;
@@ -169,17 +25,6 @@ var carousel = (function () {
     var timerId = null;
     var changeCallback = null;
     init(options);
-
-    /*
-     * {
-     *   el:
-     *   urls:[]
-     *   curIndex:0
-     *   isAutoPlay:true
-     *   cycle:999
-     *   change:function
-     * }
-     * */
     function init (options) {
       if (!options.el) {
         throw new Error('el does not exist');
@@ -192,7 +37,7 @@ var carousel = (function () {
     }
 
     function initData (options) {
-      curIndex = options.curIndex;
+      curIndex = options.curIndex || 0;
       urls = options.urls;
       isAutoPlay = typeof options.isAutoPlay === 'boolean' ? options.isAutoPlay : true;
       cycle = typeof options.cycle === 'number' ? options.cycle : 2222;
@@ -259,7 +104,7 @@ var carousel = (function () {
         guide.classList.add('guide');
         guide.addEventListener('click', guideClickHandler);//委托
         buildIndicators(guide, length);
-        initIndicators(guide);
+        initActiveIndicators(guide);
         main.appendChild(guide);
 
         function buildIndicators (guide, length) {
@@ -288,7 +133,7 @@ var carousel = (function () {
     }
 
     function terminalPlay (cb, arg) {
-      clearTimeout(timerId);
+      isAutoPlay && clearTimeout(timerId);
       cb(arg);
       isAutoPlay && (timerId = setTimeout(autoPlay, cycle))
     }
@@ -307,16 +152,32 @@ var carousel = (function () {
       terminalPlay(previous);
     }
 
+    //跳到第几张
+    function jumpTo (i) {
+      var cb = null, arg = null;
+      if (i > curIndex) {
+        cb = next, arg = i - curIndex;
+      } else if (i < curIndex) {
+        cb = previous, arg = curIndex - i;
+      }
+
+      terminalPlay(cb, arg);
+    }
 
     function previous (step) {//step移动步数
       if (isMoving) {
         return;
       }
       !step && step !== 0 && (step = 1);//step不存在，默认移动1一步
+
+      var oldIndex = curIndex;
       curIndex = curIndex - step;
-      if (curIndex < 0) {
-        curIndex += urls.length
+      curIndex < 0 && (curIndex += urls.length)
+
+      if (changeCallback(curIndex, oldIndex) === false) {
+        return;
       }
+
       var footer = boxes.pop();
       boxes.unshift(footer);
 
@@ -328,25 +189,20 @@ var carousel = (function () {
         return;
       }
       !step && step !== 0 && (step = 1);//i不存在，默认移动1一步
+
+      var oldIndex = curIndex;
       curIndex = curIndex + step;
       if (curIndex >= urls.length) {
         curIndex -= urls.length
+      }
+      if (changeCallback(curIndex, oldIndex) === false) {
+        return;
       }
       var head = boxes.shift();
       boxes.push(head);
       move(boxes, RIGHT);
     }
-
-//跳到第几张
-    function jumpTo (i) {
-      if (i > curIndex) {
-        next(i - curIndex);
-      } else if (i < curIndex) {
-        previous(curIndex - i);
-      }
-    }
-
-
+    //执行切换 入口只有next和previous
     function move (boxes, direction) {
       isMoving = true;
       boxes[1].imgEL.src = urls[curIndex];//先渲染主图
@@ -370,16 +226,19 @@ var carousel = (function () {
       rightNode.classList.remove('current');
       var guide = boxes[0].el.parentNode.querySelector('.guide');
 
-      initIndicators(guide);
+      initActiveIndicators(guide);
       setTimeout(buildImgUrl, 500, boxes);
-      changeCallback()//
     }
 
-    function initIndicators (guide) {
+    function initActiveIndicators (guide) {
       guide.querySelectorAll('[data-index]').forEach(function (item) {
-        item.style.borderColor = 'white';
+        var index = stringToNumber(item.dataset.index);
+        if (index === curIndex) {
+          item.style.borderColor = '#328bff';
+        } else {
+          item.style.borderColor = 'white';
+        }
       })
-      guide.querySelector('[data-index="' + curIndex + '"]').style.borderColor = '#328bff';
     }
 
     function autoPlay () {
@@ -390,7 +249,24 @@ var carousel = (function () {
       isAutoPlay && (timerId = setTimeout(autoPlay, cycle))
     }
 
+    return {
+      jumpTo: jumpTo,//考虑如果ismoveing;拦截了怎么办,维护一个调用队列？
+      next: onNext,
+      previous: onPrevious
+    }
+  }
 
+  function noop () {
+  }
+
+  function stringToNumber (str) {
+    if (typeof str === 'number') {
+      return str;
+    }
+    if (typeof str !== 'string') {
+      throw new Error('str is not a string');
+    }
+    return Number(str);
   }
 
   function init (option) {
@@ -401,27 +277,3 @@ var carousel = (function () {
     init: init
   }
 })()
-
-function log () {
-  console.log(Math.random());
-}
-//-----------------------------------------------------------------------------------------
-carousel.init({
-  el: document.getElementById('div1'),
-  urls: ['./1.jpg', './2.jpg', './3.jpg', './4.jpg', './5.jpg'],//
-  curIndex: 3,//urls数组的下标，0是第一个,
-  cycle: 4444
-}) ===
-carousel.init({
-  el: document.getElementById('div1'),
-  urls: ['./6.jpg', './7.jpg', './8.jpg', './9.jpg'],//
-  curIndex: 3,//urls数组的下标，0是第一个
-  change:log
-})
-carousel.init({
-  el: document.getElementById('div1'),
-  urls: ['./3.jpg', './4.jpg', './5.jpg', './6.jpg'],//
-  curIndex: 3,//urls数组的下标，0是第一个
-  isAutoPlay: false
-})
-</script>

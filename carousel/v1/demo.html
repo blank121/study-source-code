@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="./my-carousel.css" rel="stylesheet">
+</head>
+<body style="margin: 0;position: absolute;width: 100%;height: 100%;" id="body">
+<div style="height: 33%" id="div1"></div>
+<div style="height: 33%" id="div2"></div>
+<div style="height: 33%" id="div3"></div>
+<!--<div class="carousel">-->
+<!--<main class="main">-->
+<!--<div class="previous">-->
+<!--<div class="previous-button"></div>-->
+<!--</div>-->
+<!--<div class="img-wrapper left" id="img-wrapper1">-->
+<!--<img>-->
+<!--</div>-->
+<!--<div class="img-wrapper current" id="img-wrapper2">-->
+<!--<img>-->
+<!--</div>-->
+<!--<div class="img-wrapper right" id="img-wrapper3">-->
+<!--<img>-->
+<!--</div>-->
+<!--<div class="next">-->
+<!--<div class="next-button"></div>-->
+<!--</div>-->
+<!--<div class="guide">-->
+<!--</div>-->
+<!--</main>-->
+<!--</div>-->
+</body>
+</html>
+<script src="./my-carousel.js"></script>
+<script>
+function log (newindex, oldindex) {
+  console.log(newindex, oldindex);
+}
+//-----------------------------------------------------------------------------------------
+var carousel1 = myCarousel.init({
+  el: document.getElementById('div1'),
+  urls: ['../img/1.jpg', '../img/2.jpg', '../img/3.jpg', '../img/4.jpg', '../img/5.jpg'],//
+  curIndex: 3,//urls数组的下标，0是第一个,
+  cycle: 3333
+})
+var carousel2 = myCarousel.init({
+  el: document.getElementById('div1'),
+  urls: ['../img/6.jpg', '../img/7.jpg', '../img/8.jpg', '../img/9.jpg'],//
+  curIndex: 3,//urls数组的下标，0是第一个
+  change: log
+})
+myCarousel.init({
+  el: document.getElementById('div1'),
+  urls: ['../img/3.jpg', '../img/4.jpg', '../img/5.jpg', '../img/6.jpg'],//
+  curIndex: 3,//urls数组的下标，0是第一个
+  isAutoPlay: false
+})
+</script>

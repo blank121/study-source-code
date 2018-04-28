@@ -1,0 +1,120 @@
+.carousel {
+    height: 100%;
+}
+
+.main {
+    font-size: 0;
+    white-space: nowrap;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.img-wrapper {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transition: left .5s;
+}
+
+.img-wrapper img {
+    height: 100%;
+    width: 100%;
+}
+
+main:hover .previous {
+    visibility: visible;
+}
+
+main:hover .next {
+    visibility: visible;
+}
+
+.previous {
+    z-index: 3;
+    cursor: pointer;
+    left: 1%;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    position: absolute;
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    border: 1px solid grey;
+    visibility: hidden;
+}
+
+.next {
+    z-index: 3;
+    cursor: pointer;
+    right: 1%;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    position: absolute;
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    border: 1px solid grey;
+    visibility: hidden;
+}
+
+.previous-button {
+    position: absolute;
+    height: 0;
+    top: 0;
+    left: 7px;
+    bottom: 0;
+    margin: auto 0;
+    border-top: 8px solid transparent;
+    border-right: 15px solid #c5c5c5;
+    border-bottom: 8px solid transparent;
+}
+
+.next-button {
+    position: absolute;
+    height: 0;
+    top: 0;
+    left: 11px;
+    bottom: 0;
+    margin: auto 0;
+    border-top: 8px solid transparent;
+    border-left: 15px solid #c5c5c5;
+    border-bottom: 8px solid transparent;
+}
+
+.left {
+    left: -100%;
+}
+
+.current {
+    left: 0;
+}
+
+.right {
+    left: 100%;
+}
+
+.guide {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%); /*自身宽度的50%*/
+}
+
+.indicator {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #eeeeee;
+    border: 1px solid white;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 11px;
+}
+
+.indicator:hover {
+    border-color: #328bff;
+}
