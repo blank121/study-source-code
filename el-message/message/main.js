@@ -16,7 +16,7 @@ const Message = function (options) {
       message: options
     };
   }
-  let userOnClose = options.onClose;
+  let userOnClose = options.onClose;//使用者的close回调
   let id = 'message_' + seed++;
 
   // 简单包装一下
