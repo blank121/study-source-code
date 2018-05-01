@@ -13,7 +13,7 @@ Function.prototype.bind = function (oThis) {
     fBound = function () {
       return fToBind.apply(
         (
-          this instanceof fNOP &&
+          this instanceof fNOP &&//允许new进行覆盖的部分，如果this的原型链中找到了fNOP，说明使用了new
           oThis ? this : oThis
         ),
         //arguments:fBound的arguments；此举目的是合并两次调用的传参
@@ -23,7 +23,7 @@ Function.prototype.bind = function (oThis) {
     }
   ;
 
-  fNOP.prototype = this.prototype;//维护原型
+  fNOP.prototype = this.prototype;//维护原型,为了new的this覆盖
   fBound.prototype = new fNOP();
 
   return fBound;
