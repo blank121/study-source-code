@@ -14,6 +14,7 @@ export class HashHistory extends History {
     if (fallback && checkFallback(this.base)) {
       return
     }
+    // 保证 hash 是以 / 开头
     ensureSlash()
   }
 
@@ -79,8 +80,11 @@ export class HashHistory extends History {
 }
 
 function checkFallback (base) {
-  const location = getLocation(base)
+  // 得到除去 base 的真正的 location 值
+  const location = getLocation(this.base)
   if (!/^\/#/.test(location)) {
+    // 如果说此时的地址不是以 /# 开头的
+    // 需要做一次降级处理 降级为 hash 模式下应有的 /# 开头
     window.location.replace(
       cleanPath(base + '/#' + location)
     )
@@ -88,11 +92,16 @@ function checkFallback (base) {
   }
 }
 
+
+// 保证 hash 以 / 开头
 function ensureSlash (): boolean {
+  // 得到 hash 值
   const path = getHash()
+  // 如果说是以 / 开头的 直接返回即可
   if (path.charAt(0) === '/') {
     return true
   }
+  // 不是的话 需要手工保证一次 替换 hash 值
   replaceHash('/' + path)
   return false
 }
@@ -100,8 +109,12 @@ function ensureSlash (): boolean {
 export function getHash (): string {
   // We can't use window.location.hash here because it's not
   // consistent across browsers - Firefox will pre-decode it!
+  // 因为兼容性问题 这里没有直接使用 window.location.hash
+  // 因为 Firefox 会decode hash 值
   const href = window.location.href
   const index = href.indexOf('#')
+  // 如果此时没有 # 则返回 ''
+  // 否则 取得 # 后的所有内容
   return index === -1 ? '' : href.slice(index + 1)
 }
 

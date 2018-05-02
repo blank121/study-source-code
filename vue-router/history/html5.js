@@ -11,7 +11,7 @@ export class HTML5History extends History {
   //base:应用的基路径。例如，如果整个单页应用服务在 /app/ 下，然后 base 就应该设为 "/app/"。
   constructor (router: Router, base: ?string) {
     super(router, base)
-
+    // 定义滚动行为 option
     const expectScroll = router.options.scrollBehavior
     const supportsScroll = supportsPushState && expectScroll
 
@@ -19,7 +19,10 @@ export class HTML5History extends History {
       setupScroll()
     }
 
+
     const initLocation = getLocation(this.base)
+    // 监听 popstate 事件 也就是
+    // 浏览器历史记录发生改变的时候（点击浏览器前进后退 或者调用 history api ）
     window.addEventListener('popstate', e => {
       const current = this.current
 
