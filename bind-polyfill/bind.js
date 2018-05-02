@@ -13,7 +13,7 @@ Function.prototype.bind = function (oThis) {
     fBound = function () {
       return fToBind.apply(
         (
-          this instanceof fNOP &&//允许new进行覆盖的部分，如果this的原型链中找到了fNOP，说明使用了new
+          this instanceof fNOP &&//允许new进行覆盖oThis，如果this的原型链中找到了fNOP，说明使用了new
           oThis ? this : oThis
         ),
         //arguments:fBound的arguments；此举目的是合并两次调用的传参
@@ -27,4 +27,23 @@ Function.prototype.bind = function (oThis) {
   fBound.prototype = new fNOP();
 
   return fBound;
+};
+
+//返回一个函数，如果this存在，则保持this,如果this为window或global，则将this软绑定为指定的obj
+Function.prototype.softBind = function (obj) {
+  var fn = this,
+    curried = [].slice.call(arguments, 1),
+    bound = function bound () {
+      return fn.apply(
+        (!this ||
+          (typeof window !== "undefined" &&
+          this === window) ||
+          (typeof global !== "undefined" &&
+          this === global)
+        ) ? obj : this,
+        curried.concat.apply(curried, arguments)
+      );
+    };
+  bound.prototype = Object.create(fn.prototype);
+  return bound;
 };
