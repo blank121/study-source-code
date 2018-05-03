@@ -1,4 +1,4 @@
-/* @flow */
+  /* @flow */
 
 import type VueRouter from './index'
 import {resolvePath} from './util/path'
@@ -27,7 +27,9 @@ export function createMatcher (routes: Array<RouteConfig>, router: VueRouter): M
     const location = normalizeLocation(raw, currentRoute, false, router)
     const {name} = location
 
+    // 命名路由处理
     if (name) {
+      // nameMap[name] = 路由记录
       const record = nameMap[name]
       if (process.env.NODE_ENV !== 'production') {
         warn(record, `Route with name '${name}' does not exist`)
@@ -54,11 +56,14 @@ export function createMatcher (routes: Array<RouteConfig>, router: VueRouter): M
         return _createRoute(record, location, redirectedFrom)
       }
     } else if (location.path) {
+      // 普通路由处理
       location.params = {}
       for (let i = 0; i < pathList.length; i++) {
         const path = pathList[i]
         const record = pathMap[path]
         if (matchRoute(record.regex, location.path, location.params)) {
+          // 匹配成功 创建route
+          // pathMap[path] = 路由记录
           return _createRoute(record, location, redirectedFrom)
         }
       }
@@ -147,12 +152,14 @@ export function createMatcher (routes: Array<RouteConfig>, router: VueRouter): M
   function _createRoute (record: ?RouteRecord,
                          location: Location,
                          redirectedFrom?: Location): Route {
+    // 重定向和别名逻辑
     if (record && record.redirect) {
       return redirect(record, redirectedFrom || location)
     }
     if (record && record.matchAs) {
       return alias(record, location, record.matchAs)
     }
+    // 创建路由对象
     return createRoute(record, location, redirectedFrom, router)
   }
 

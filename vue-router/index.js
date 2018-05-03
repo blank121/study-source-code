@@ -126,8 +126,10 @@ export default class VueRouter {
       )
     }
 
+    // this.cb = cb
     history.listen(route => {
       this.apps.forEach((app) => {
+        //响应式的 _route 属性,如果该属性值发生了变化,就会触发更新机制，继而调用应用实例的 render 重新渲染
         app._route = route
       })
     })
