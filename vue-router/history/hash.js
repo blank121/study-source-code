@@ -1,14 +1,15 @@
 /* @flow */
 
 import type Router from '../index'
-import { History } from './base'
-import { cleanPath } from '../util/path'
-import { getLocation } from './html5'
-import { setupScroll, handleScroll } from '../util/scroll'
-import { pushState, replaceState, supportsPushState } from '../util/push-state'
+import {History} from './base'
+import {cleanPath} from '../util/path'
+import {getLocation} from './html5'
+import {setupScroll, handleScroll} from '../util/scroll'
+import {pushState, replaceState, supportsPushState} from '../util/push-state'
 
 export class HashHistory extends History {
   constructor (router: Router, base: ?string, fallback: boolean) {
+    // 调用基类构造器
     super(router, base)
     // check history fallback deeplinking
     if (fallback && checkFallback(this.base)) {
@@ -28,10 +29,12 @@ export class HashHistory extends History {
     if (supportsScroll) {
       setupScroll()
     }
-
+    //当URL的片段标识符更改时，将触发hashchange事件 (跟在＃符号后面的URL部分，包括＃符号)
+    //需要注意的是调用history.pushState()或history.replaceState()不会触发popstate事件。只有在做出浏览器动作时，才会触发该事件，如用户点击浏览器的回退按钮（或者在Javascript代码中调用history.back()）
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
       const current = this.current
       if (!ensureSlash()) {
+        // 不是 / 开头
         return
       }
       this.transitionTo(getHash(), route => {
@@ -46,7 +49,7 @@ export class HashHistory extends History {
   }
 
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    const { current: fromRoute } = this
+    const {current: fromRoute} = this
     this.transitionTo(location, route => {
       pushHash(route.fullPath)
       handleScroll(this.router, route, fromRoute, false)
@@ -55,7 +58,7 @@ export class HashHistory extends History {
   }
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    const { current: fromRoute } = this
+    const {current: fromRoute} = this
     this.transitionTo(location, route => {
       replaceHash(route.fullPath)
       handleScroll(this.router, route, fromRoute, false)

@@ -34,11 +34,12 @@ export default class VueRouter {
   afterHooks: Array<?AfterNavigationHook>;
 
   constructor (options: RouterOptions = {}) {
-/*    Vue instance
-    配置了 router 的 Vue 根实例。*/
+    /*    Vue instance
+     配置了 router 的 Vue 根实例。*/
     this.app = null
     /* 保存vm实例 */
     this.apps = []
+
     this.options = options
     this.beforeHooks = []
     this.resolveHooks = []
@@ -113,6 +114,7 @@ export default class VueRouter {
 
     const history = this.history
 
+    //进入初始路由
     if (history instanceof HTML5History) {
       history.transitionTo(history.getCurrentLocation())
     } else if (history instanceof HashHistory) {
@@ -159,23 +161,28 @@ export default class VueRouter {
   onError (errorCb: Function) {
     this.history.onError(errorCb)
   }
+
   //实际是调用具体history对象的方法
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     this.history.push(location, onComplete, onAbort)
   }
+
   //实际是调用具体history对象的方法
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     this.history.replace(location, onComplete, onAbort)
   }
 
+  //模拟浏览器操作
   go (n: number) {
     this.history.go(n)
   }
 
+  //模拟浏览器操作
   back () {
     this.go(-1)
   }
 
+  //模拟浏览器操作
   forward () {
     this.go(1)
   }

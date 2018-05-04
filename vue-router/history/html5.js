@@ -16,15 +16,17 @@ export class HTML5History extends History {
     const supportsScroll = supportsPushState && expectScroll
 
     if (supportsScroll) {
-      setupScroll()
+      setupScroll()//构建滚动行为
     }
 
 
     const initLocation = getLocation(this.base)
-    // 监听 popstate 事件 也就是
-    // 浏览器历史记录发生改变的时候（点击浏览器前进后退 或者调用 history api ）
+    // 监听 popstate 事件
+    // 触发时机：浏览器历史记录发生改变的时候（点击浏览器前进后退 或者调用 history api ） 比如
+    // popstate 学习 TODO
+    //Hash没有在constructor里面注册监听哦
     window.addEventListener('popstate', e => {
-      const current = this.current
+      const current = this.current//当前route
 
       // Avoiding first `popstate` event dispatched in some browsers but first
       // history route not updated since async guard at the same time.
@@ -42,7 +44,7 @@ export class HTML5History extends History {
   }
 
   go (n: number) {
-    window.history.go(n)
+    window.history.go(n) //fire popstate
   }
 
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
@@ -63,6 +65,7 @@ export class HTML5History extends History {
     }, onAbort)
   }
 
+  //更新url
   ensureURL (push?: boolean) {
     if (getLocation(this.base) !== this.current.fullPath) {
       const current = cleanPath(this.base + this.current.fullPath)

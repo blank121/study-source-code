@@ -1,11 +1,12 @@
 /* @flow */
 
-import { _Vue } from '../install'
+// 这里从之前分析过的 install.js 中 export _Vue
+import {_Vue} from '../install'
 import type Router from '../index'
-import { inBrowser } from '../util/dom'
-import { runQueue } from '../util/async'
-import { warn, isError } from '../util/warn'
-import { START, isSameRoute } from '../util/route'
+import {inBrowser} from '../util/dom'
+import {runQueue} from '../util/async'
+import {warn, isError} from '../util/warn'
+import {START, isSameRoute} from '../util/route'
 import {
   flatten,
   flatMapComponents,
@@ -27,7 +28,11 @@ export class History {
   +go: (n: number) => void;
   +push: (loc: RawLocation) => void;
   +replace: (loc: RawLocation) => void;
-  +ensureURL: (push?: boolean) => void;
+  +ensureURL: (push?
+:
+  boolean
+) =>
+  void;
   +getCurrentLocation: () => string;
 
   constructor (router: Router, base: ?string) {
@@ -64,20 +69,23 @@ export class History {
   transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     // 调用 match 得到匹配的 route 对象
     const route = this.router.match(location, this.current)
+
+    // 准备过渡 confirmTransition (route: Route, onComplete: Function, onAbort?: Function)
     this.confirmTransition(route, () => {
       this.updateRoute(route)
       onComplete && onComplete(route) //回调
 
       // 子类实现的更新url地址
       // 对于 hash 模式的话 就是更新 hash 的值
-      // 对于 history 模式的话 就是利用 pushstate / replacestate 来更新
-      // 浏览器地址
+      // 对于 history 模式的话 就是利用 pushstate / replacestate 来更新浏览器地址
       this.ensureURL()
 
       // fire ready cbs once
       if (!this.ready) {
         this.ready = true
-        this.readyCbs.forEach(cb => { cb(route) })
+        this.readyCbs.forEach(cb => {
+          cb(route)
+        })
       }
     }, err => {
       if (onAbort) {
@@ -85,7 +93,9 @@ export class History {
       }
       if (err && !this.ready) {
         this.ready = true
-        this.readyErrorCbs.forEach(cb => { cb(err) })
+        this.readyErrorCbs.forEach(cb => {
+          cb(err)
+        })
       }
     })
   }
@@ -95,7 +105,9 @@ export class History {
     const abort = err => {
       if (isError(err)) {
         if (this.errorCbs.length) {
-          this.errorCbs.forEach(cb => { cb(err) })
+          this.errorCbs.forEach(cb => {
+            cb(err)
+          })
         } else {
           warn(false, 'uncaught error during route navigation:')
           console.error(err)
@@ -103,9 +115,8 @@ export class History {
       }
       onAbort && onAbort(err)
     }
-    if (
-      // 如果是相同 直接返回
-      isSameRoute(route, current) &&
+    // 如果是相同 直接返回
+    if (isSameRoute(route, current) &&
       // in the case the route map has been dynamically appended to
       route.matched.length === current.matched.length
     ) {
@@ -124,15 +135,15 @@ export class History {
 
     // 整个切换周期的队列
     const queue: Array<?NavigationGuard> = [].concat(
-      // in-component leave guards
+      // in-component leave guards   // leave 的钩子
       extractLeaveGuards(deactivated),
-      // global before hooks
+      // global before hooks       // 全局 router before hooks
       this.router.beforeHooks,
-      // in-component update hooks
+      // in-component update hooks   // TODO
       extractUpdateHooks(updated),
-      // in-config enter guards
+      // in-config enter guards     // 将要更新的路由的 beforeEnter 钩子
       activated.map(m => m.beforeEnter),
-      // async components
+      // async components       // 异步组件
       resolveAsyncComponents(activated)
     )
 
@@ -191,12 +202,15 @@ export class History {
         onComplete(route)
         if (this.router.app) {
           this.router.app.$nextTick(() => {
-            postEnterCbs.forEach(cb => { cb() })
+            postEnterCbs.forEach(cb => {
+              cb()
+            })
           })
         }
       })
     })
   }
+
   // 更新当前 route 对象
   updateRoute (route: Route) {
     const prev = this.current
@@ -214,7 +228,7 @@ export class History {
 function normalizeBase (base: ?string): string {
   if (!base) {
     if (inBrowser) {
-      // respect <base> tag
+      // respect <base> tag TODO
       const baseEl = document.querySelector('base')
       base = (baseEl && baseEl.getAttribute('href')) || '/'
       // strip full URL origin
@@ -231,21 +245,21 @@ function normalizeBase (base: ?string): string {
   return base.replace(/\/$/, '')
 }
 
-function resolveQueue (
-  current: Array<RouteRecord>,
-  next: Array<RouteRecord>
-): {
+function resolveQueue (current: Array<RouteRecord>,
+                       next: Array<RouteRecord>): {
   updated: Array<RouteRecord>,
   activated: Array<RouteRecord>,
   deactivated: Array<RouteRecord>
 } {
   let i
+
   const max = Math.max(current.length, next.length)
   for (i = 0; i < max; i++) {
     if (current[i] !== next[i]) {
       break
     }
   }
+  // 舍掉相同的部分 只保留不同的
   return {
     updated: next.slice(0, i),
     activated: next.slice(i),
@@ -253,12 +267,10 @@ function resolveQueue (
   }
 }
 
-function extractGuards (
-  records: Array<RouteRecord>,
-  name: string,
-  bind: Function,
-  reverse?: boolean
-): Array<?Function> {
+function extractGuards (records: Array<RouteRecord>,
+                        name: string,
+                        bind: Function,
+                        reverse?: boolean): Array<?Function> {
   const guards = flatMapComponents(records, (def, instance, match, key) => {
     const guard = extractGuard(def, name)
     if (guard) {
@@ -270,10 +282,8 @@ function extractGuards (
   return flatten(reverse ? guards.reverse() : guards)
 }
 
-function extractGuard (
-  def: Object | Function,
-  key: string
-): NavigationGuard | Array<NavigationGuard> {
+function extractGuard (def: Object | Function,
+                       key: string): NavigationGuard | Array<NavigationGuard> {
   if (typeof def !== 'function') {
     // extend now so that global mixins are applied.
     def = _Vue.extend(def)
@@ -297,23 +307,19 @@ function bindGuard (guard: NavigationGuard, instance: ?_Vue): ?NavigationGuard {
   }
 }
 
-function extractEnterGuards (
-  activated: Array<RouteRecord>,
-  cbs: Array<Function>,
-  isValid: () => boolean
-): Array<?Function> {
+function extractEnterGuards (activated: Array<RouteRecord>,
+                             cbs: Array<Function>,
+                             isValid: () => boolean): Array<?Function> {
   return extractGuards(activated, 'beforeRouteEnter', (guard, _, match, key) => {
     return bindEnterGuard(guard, match, key, cbs, isValid)
   })
 }
 
-function bindEnterGuard (
-  guard: NavigationGuard,
-  match: RouteRecord,
-  key: string,
-  cbs: Array<Function>,
-  isValid: () => boolean
-): NavigationGuard {
+function bindEnterGuard (guard: NavigationGuard,
+                         match: RouteRecord,
+                         key: string,
+                         cbs: Array<Function>,
+                         isValid: () => boolean): NavigationGuard {
   return function routeEnterGuard (to, from, next) {
     return guard(to, from, cb => {
       next(cb)
@@ -331,12 +337,10 @@ function bindEnterGuard (
   }
 }
 
-function poll (
-  cb: any, // somehow flow cannot infer this is a function
-  instances: Object,
-  key: string,
-  isValid: () => boolean
-) {
+function poll (cb: any, // somehow flow cannot infer this is a function
+               instances: Object,
+               key: string,
+               isValid: () => boolean) {
   if (instances[key]) {
     cb(instances[key])
   } else if (isValid()) {

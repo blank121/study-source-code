@@ -1,22 +1,23 @@
 /* @flow */
 
-import { inBrowser } from './dom'
-import { saveScrollPosition } from './scroll'
+import {inBrowser} from './dom'
+import {saveScrollPosition} from './scroll'
 
+//函数表达式立即执行，避免污染全局变量
 export const supportsPushState = inBrowser && (function () {
-  const ua = window.navigator.userAgent
+    const ua = window.navigator.userAgent
 
-  if (
-    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
-    ua.indexOf('Mobile Safari') !== -1 &&
-    ua.indexOf('Chrome') === -1 &&
-    ua.indexOf('Windows Phone') === -1
-  ) {
-    return false
-  }
+    if (
+      (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
+      ua.indexOf('Mobile Safari') !== -1 &&
+      ua.indexOf('Chrome') === -1 &&
+      ua.indexOf('Windows Phone') === -1
+    ) {
+      return false
+    }
 
-  return window.history && 'pushState' in window.history
-})()
+    return window.history && 'pushState' in window.history
+  })()
 
 // use User Timing api (if present) for more accurate key precision
 const Time = inBrowser && window.performance && window.performance.now
@@ -44,10 +45,10 @@ export function pushState (url?: string, replace?: boolean) {
   const history = window.history
   try {
     if (replace) {
-      history.replaceState({ key: _key }, '', url)
+      history.replaceState({key: _key}, '', url)
     } else {
       _key = genKey()
-      history.pushState({ key: _key }, '', url)
+      history.pushState({key: _key}, '', url)
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url)

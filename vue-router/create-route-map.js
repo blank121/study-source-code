@@ -20,6 +20,7 @@ export function createRouteMap (routes: Array<RouteConfig>,
   // $flow-disable-line
   const nameMap: Dictionary<RouteRecord> = oldNameMap || Object.create(null)
 
+  // 遍历路由配置对象 增加 路由记录
   routes.forEach(route => {
     addRouteRecord(pathList, pathMap, nameMap, route)
   })
@@ -65,14 +66,14 @@ function addRouteRecord (pathList: Array<string>,
       `string id. Use an actual component instead.`
     )
   }
-
+// 编译正则的选项
   const pathToRegexpOptions: PathToRegexpOptions = route.pathToRegexpOptions || {}
   const normalizedPath = normalizePath(
     path,
     parent,
     pathToRegexpOptions.strict
   )
-
+  // 匹配规则是否大小写敏感？(默认值：false)
   if (typeof route.caseSensitive === 'boolean') {
     pathToRegexpOptions.sensitive = route.caseSensitive
   }
@@ -140,12 +141,14 @@ function addRouteRecord (pathList: Array<string>,
     })
   }
 
+  //增加记录
   if (!pathMap[record.path]) {
     pathList.push(record.path)
     pathMap[record.path] = record
   }
-
+  //Duplicate named
   if (name) {
+    //增加记录
     if (!nameMap[name]) {
       nameMap[name] = record
     } else if (process.env.NODE_ENV !== 'production' && !matchAs) {

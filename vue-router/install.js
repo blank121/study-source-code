@@ -18,8 +18,8 @@ export function install (Vue) {
 
   /* 通过registerRouteInstance方法注册router实例 */
   const registerInstance = (vm, callVal) => {
-    let i = vm.$options._parentVnode
-    if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
+    let i = vm.$options._parentVnode//TODO
+    if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {//router-view
       i(vm, callVal)
     }
   }
@@ -29,11 +29,13 @@ export function install (Vue) {
     /* boforeCreate钩子 */
     beforeCreate () {
       if (isDef(this.$options.router)) {
+        //new Vue时配置的routerl
         /* 在option上面存在router则代表是根组件 */
         /* 保存跟组件vm */
         this._routerRoot = this
         /* 保存router */
         this._router = this.$options.router
+        //根组件beforeCreate时init
         /* VueRouter对象的init方法 */
         this._router.init(this)
         /* Vue内部方法，为对象defineProperty上在变化时通知的属性 */
