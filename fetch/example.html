@@ -6,16 +6,22 @@
 </head>
 <body>
 <script>
-var result = fetch('https://api.github.com')
-result.then(function (response) {
-  console.log('response', response)
-  console.log('header', response.headers.get('Content-Type'))
-  return response.text()
-}).then(function (text) {
-  console.log('got text', text)
-}).catch(function (ex) {
-  console.log('failed', ex)
-})
+try{
+  var result = fetch('https://api.github.com/345345')
+  result.then(function (response) {
+    console.log('response', response)
+    console.log('header', response.headers.get('Content-Type'))
+    return response.text()
+  }).then(function (text) {
+    console.log('got text', text)
+  }).catch(function (ex) {
+    console.log('failed', ex)
+  })
+}catch(e){
+  console.log(e)
+}
+
+
 
 //var xhr = new XMLHttpRequest();
 //xhr.timeout = 13000;

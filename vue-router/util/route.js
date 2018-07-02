@@ -26,6 +26,7 @@ export function createRoute (
     query,
     params: location.params || {},
     fullPath: getFullPath(location, stringifyQuery),
+    // 根据记录层级的得到所有匹配的 路由记录
     matched: record ? formatMatch(record) : []
   }
   if (redirectedFrom) {
